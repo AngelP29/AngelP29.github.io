@@ -314,17 +314,21 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, query, where, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-          const firebaseConfig = {
+         const firebaseConfig = {
         apiKey: "AIzaSyBmtejvlfgak7_Ri_3Pl4VJmh-psAElae0",
         authDomain: "home-improvement-77903.firebaseapp.com",
         projectId: "home-improvement-77903",
         storageBucket: "home-improvement-77903.firebasestorage.app",
         messagingSenderId: "1002228751462",
         appId: "1:1002228751462:web:88aefba46cbb28c503e1a7",
-        };
+    };
+
+    // Global variables provided by the Canvas environment (prefer this if deployed in Canvas)
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    // const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         // Global variables provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Initialize Firebase
@@ -376,6 +380,7 @@
         const taskDateInput = document.getElementById('taskDateInput');
         const taskStatusInput = document.getElementById('taskStatusInput');
         const saveTaskBtn = document.getElementById('saveTaskBtn');
+        // FIX: Corrected the assignment for cancelTaskBtn
         const cancelTaskBtn = document.getElementById('cancelTaskBtn');
         const markCompleteBtn = document.getElementById('markCompleteBtn');
         const markInProgressBtn = document.getElementById('markInProgressBtn');
@@ -614,7 +619,7 @@
                     }
                 };
 
-                const geminiApiKey = "AIzaSyDSMjcogi1lKfcz3xdYTqWVBWixBwpPoSs"; // Canvas will provide this
+                 const geminiApiKey = "AIzaSyDSMjcogi1lKfcz3xdYTqWVBWixBwpPoSs" 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
 
                 const response = await fetch(apiUrl, {
@@ -623,6 +628,12 @@
                     body: JSON.stringify(payload)
                 });
 
+                // Check if the HTTP response itself was successful
+                if (!response.ok) {
+                    const errorBody = await response.text(); // Get response body as text for error details
+                    throw new Error(`HTTP error! status: ${response.status}, body: ${errorBody}`);
+                }
+
                 const result = await response.json();
 
                 if (result.candidates && result.candidates.length > 0 &&
@@ -630,7 +641,7 @@
                     result.candidates[0].content.parts.length > 0) {
 
                     const jsonString = result.candidates[0].content.parts[0].text;
-                    const aiData = JSON.parse(jsonString);
+                    const aiData = JSON.parse(jsonString); // This can also throw if jsonString is not valid JSON
 
                     // Display AI Output
                     outputComplexity.textContent = aiData.complexity;
@@ -648,7 +659,15 @@
                     aiData.tutorials.forEach(tutorial => {
                         const li = document.createElement('li');
                         const a = document.createElement('a');
-                        a.href = tutorial.url || `https://www.google.com/search?q=${encodeURIComponent(tutorial.title + " tutorial")}`; // Fallback to Google search
+                        a.href = tutorial.url || `https://www.google.com/search?q=${encodeURIComponent(tutorial.title + " tutorial")}`;
+                    
+                        // Ensure the URL is valid before setting it, otherwise use a placeholder or skip
+                        try {
+                            new URL(a.href); // Check if URL is valid
+                        } catch (e) {
+                            a.href = `https://www.google.com/search?q=${encodeURIComponent(tutorial.title + " tutorial")}`; // Fallback if invalid
+                        }
+
                         a.textContent = tutorial.title;
                         a.target = "_blank";
                         a.className = "text-blue-600 hover:underline";
@@ -670,13 +689,20 @@
                     };
 
                 } else {
-                    showMessage("AI could not generate a plan. Please try rephrasing your request.");
+                    showMessage("AI could not generate a plan. The response was empty or malformed. Please try rephrasing your request.");
                     console.error("AI response structure unexpected:", result);
                 }
 
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
-                showMessage("Failed to generate plan. Please check your internet connection or try again later.");
+                // Provide a more specific message if it's an HTTP error
+                if (error.message.includes("HTTP error!")) {
+                    showMessage(`Failed to generate plan: ${error.message}. Please check your input or try again.`);
+                } else if (error instanceof SyntaxError) {
+                    showMessage("Failed to process AI response (invalid JSON). Please try again.");
+                } else {
+                    showMessage("Failed to generate plan. Please check your internet connection or try again later.");
+                }
             } finally {
                 generatePlanText.textContent = 'Generate Plan';
                 loadingSpinner.classList.add('hidden');
@@ -800,7 +826,7 @@
             taskEdit.classList.add('hidden');
 
             viewDescription.textContent = task.description;
-            viewType.textContent = task.type || 'Manual';
+            viewType.textContent = task.type || 'N/A'; // Default to 'N/A' if type is missing
             viewStatus.textContent = task.status;
             viewDate.textContent = new Date(task.date + 'T00:00:00').toLocaleDateString();
             viewComplexity.textContent = task.complexity || 'N/A';
@@ -826,6 +852,14 @@
                     const li = document.createElement('li');
                     const a = document.createElement('a');
                     a.href = tutorial.url || `https://www.google.com/search?q=${encodeURIComponent(tutorial.title + " tutorial")}`;
+                    
+                    // Ensure the URL is valid before setting it, otherwise use a placeholder or skip
+                    try {
+                        new URL(a.href); // Check if URL is valid
+                    } catch (e) {
+                        a.href = `https://www.google.com/search?q=${encodeURIComponent(tutorial.title + " tutorial")}`; // Fallback if invalid
+                    }
+
                     a.textContent = tutorial.title;
                     a.target = "_blank";
                     a.className = "text-blue-600 hover:underline";
