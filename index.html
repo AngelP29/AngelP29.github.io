@@ -314,9 +314,17 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, query, where, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+          const firebaseConfig = {
+        apiKey: "AIzaSyBmtejvlfgak7_Ri_3Pl4VJmh-psAElae0",
+        authDomain: "home-improvement-77903.firebaseapp.com",
+        projectId: "home-improvement-77903",
+        storageBucket: "home-improvement-77903.firebasestorage.app",
+        messagingSenderId: "1002228751462",
+        appId: "1:1002228751462:web:88aefba46cbb28c503e1a7",
+        };
         // Global variables provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Initialize Firebase
