@@ -10,19 +10,32 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            /* Fading sky blue background from bottom to top */
+            background: linear-gradient(to top, #e0f2f7, #ffffff); /* Lighter blue at bottom, white at top */
+            min-height: 100vh; /* Ensure the gradient covers the full viewport height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0; /* Add some padding for spacing */
         }
         .container {
             max-width: 1200px;
-            /* Adjustments for centering and column layout */
             display: flex;
-            flex-direction: column; /* Stack children vertically */
-            align-items: center; /* Center horizontally */
+            flex-direction: column; /* Stack children vertically for mobile first */
+            align-items: center; /* Center horizontally in column layout */
+            gap: 2rem; /* Spacing between prompt box and calendar */
+        }
+        @media (min-width: 1024px) { /* On large screens (lg) */
+            .container {
+                flex-direction: row; /* Side-by-side for desktop */
+                align-items: flex-start; /* Align items at the top when row */
+            }
         }
         .card {
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%; /* Take full width on small screens */
         }
         .btn-primary {
             background-color: #4F46E5;
@@ -133,8 +146,6 @@
             margin-bottom: 4px;
         }
         .task-item {
-            background-color: #DBEAFE; /* Light blue */
-            color: #1E40AF; /* Dark blue */
             padding: 4px 8px;
             border-radius: 6px;
             margin-bottom: 4px;
@@ -146,9 +157,8 @@
             white-space: nowrap;
             font-size: 0.75rem;
         }
-        /* Custom styles for legend colors based on original task-item classes */
         .task-item.complete {
-            background-color: #BFDBFE; /* Blue - changed from light green to blue for legend */
+            background-color: #BFDBFE; /* Light Blue */
             color: #1E40AF; /* Dark blue */
         }
         .task-item.in-progress {
@@ -156,12 +166,12 @@
             color: #92400E; /* Dark yellow */
         }
         .task-item.postponed {
-            background-color: #F0ABFC; /* Light purple - changed from light red to purple for legend */
-            color: #581C87; /* Dark purple */
+            background-color: #E9D5FF; /* Light Purple */
+            color: #7E22CE; /* Dark purple */
         }
         .task-item.manual {
-            background-color: #E0E7FF; /* Lighter blue for manual */
-            color: #3730A3; /* Indigo for manual */
+            background-color: #FFEDD5; /* Light Orange for manually added tasks */
+            color: #C2410C; /* Dark orange */
         }
 
         /* Legend specific styles */
@@ -179,9 +189,9 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center py-8">
-    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg flex-col lg:flex-row gap-8">
-        <div class="w-full lg:w-1/2 p-6 card mb-8 lg:mb-0">
+<body class="min-h-screen flex items-center justify-center py-8">
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <div class="lg:w-1/2 p-6 card">
             <h2 class="text-3xl font-bold text-gray-800 mb-6">Home Project Planner</h2>
 
             <div class="mb-6">
@@ -221,22 +231,25 @@
             </div>
         </div>
 
-        <div class="w-full lg:w-1/2 p-6 card flex flex-col items-center"> <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Project Calendar</h2>
+        <div class="lg:w-1/2 p-6 card flex flex-col">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Your Project Calendar</h2>
 
-            <div class="flex justify-between items-center mb-4 w-full">
+            <div class="flex justify-between items-center mb-4">
                 <button id="prevMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
                 <h3 id="currentMonthYear" class="text-xl font-semibold text-gray-800"></h3>
                 <button id="nextMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
             </div>
 
-            <div class="grid grid-cols-7 gap-4 text-center font-medium text-gray-600 mb-2 w-full">
+            <div class="grid grid-cols-7 gap-4 text-center font-medium text-gray-600 mb-2">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
 
-            <div id="calendarGrid" class="calendar-grid flex-grow w-full">
+            <div id="calendarGrid" class="calendar-grid flex-grow">
             </div>
 
-            <div class="flex justify-center gap-6 mt-6 w-full">
+            ---
+
+            <div class="flex flex-wrap justify-center gap-4 mt-6">
                 <div class="legend-item">
                     <div class="legend-color-box bg-yellow-200"></div>
                     <span class="text-gray-700 text-sm">In Progress</span>
@@ -249,7 +262,13 @@
                     <div class="legend-color-box bg-purple-300"></div>
                     <span class="text-gray-700 text-sm">Postponed</span>
                 </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-orange-200"></div>
+                    <span class="text-gray-700 text-sm">Manually Added</span>
+                </div>
             </div>
+
+            ---
 
             <button id="addTaskManuallyBtn" class="btn-secondary mt-6 w-full">Manually Add Task</button>
 
@@ -308,7 +327,7 @@
     </div>
 </body>
 </html>
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
