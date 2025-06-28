@@ -10,32 +10,31 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Fading sky blue background from bottom to top */
-            background: linear-gradient(to top, #e0f2f7, #ffffff); /* Lighter blue at bottom, white at top */
-            min-height: 100vh; /* Ensure the gradient covers the full viewport height */
+            background-color: #e0f2f7; /* Light sky blue color */
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 0; /* Add some padding for spacing */
+            padding: 2rem 0;
         }
         .container {
             max-width: 1200px;
             display: flex;
-            flex-direction: column; /* Stack children vertically for mobile first */
-            align-items: center; /* Center horizontally in column layout */
-            gap: 2rem; /* Spacing between prompt box and calendar */
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
         }
-        @media (min-width: 1024px) { /* On large screens (lg) */
+        @media (min-width: 1024px) {
             .container {
-                flex-direction: row; /* Side-by-side for desktop */
-                align-items: flex-start; /* Align items at the top when row */
+                flex-direction: row;
+                align-items: flex-start;
             }
         }
         .card {
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            width: 100%; /* Take full width on small screens */
+            width: 100%;
         }
         .btn-primary {
             background-color: #4F46E5;
@@ -68,15 +67,15 @@
             background-color: #F3F4F6;
         }
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
         }
@@ -107,8 +106,8 @@
             cursor: pointer;
         }
         .loading-spinner {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4F46E5; /* Blue */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4F46E5;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -166,12 +165,12 @@
             color: #92400E; /* Dark yellow */
         }
         .task-item.postponed {
-            background-color: #E9D5FF; /* Light Purple */
-            color: #7E22CE; /* Dark purple */
+            background-color: #FECACA; /* Light Red */
+            color: #991B1B; /* Dark red */
         }
         .task-item.manual {
-            background-color: #FFEDD5; /* Light Orange for manually added tasks */
-            color: #C2410C; /* Dark orange */
+            background-color: #EDE9FE; /* Light Purple for manually added tasks */
+            color: #5B21B6; /* Dark purple */
         }
 
         /* Legend specific styles */
@@ -185,7 +184,7 @@
             height: 16px;
             border-radius: 4px;
             margin-right: 8px;
-            border: 1px solid #E5E7EB; /* Subtle border for clarity */
+            border: 1px solid #E5E7EB;
         }
     </style>
 </head>
@@ -259,11 +258,11 @@
                     <span class="text-gray-700 text-sm">Completed</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color-box bg-purple-300"></div>
+                    <div class="legend-color-box bg-red-300"></div>
                     <span class="text-gray-700 text-sm">Postponed</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color-box bg-orange-200"></div>
+                    <div class="legend-color-box bg-purple-200"></div>
                     <span class="text-gray-700 text-sm">Manually Added</span>
                 </div>
             </div>
