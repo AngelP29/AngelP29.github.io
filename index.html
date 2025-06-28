@@ -323,13 +323,10 @@
         appId: "1:1002228751462:web:88aefba46cbb28c503e1a7",
     };
 
-    // Global variables provided by the Canvas environment (prefer this if deployed in Canvas)
+        // Global variables provided by the Canvas environment (prefer this if deployed in Canvas)
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     // const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
     const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Initialize Firebase
         let app;
@@ -619,7 +616,7 @@
                     }
                 };
 
-                 const geminiApiKey = "AIzaSyDSMjcogi1lKfcz3xdYTqWVBWixBwpPoSs" 
+                const geminiApiKey = "AIzaSyDSMjcogi1lKfcz3xdYTqWVBWixBwpPoSs" 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
 
                 const response = await fetch(apiUrl, {
