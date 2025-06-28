@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Home Helper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .btn-primary {
+            background-color: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #4338CA;
+        }
+        .btn-secondary {
+            background-color: #6B7280;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #4B5563;
+        }
+        .btn-outline {
+            border: 1px solid #D1D5DB;
+            color: #4B5563;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .btn-outline:hover {
+            background-color: #F3F4F6;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4F46E5; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-day {
+            min-height: 80px;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 0.875rem;
+            position: relative;
+            background-color: #F9FAFB;
+        }
+        .calendar-day.current-month {
+            background-color: #ffffff;
+        }
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .task-item {
+            background-color: #DBEAFE; /* Light blue */
+            color: #1E40AF; /* Dark blue */
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 0.75rem;
+        }
+        .task-item.complete {
+            background-color: #D1FAE5; /* Light green */
+            color: #065F46; /* Dark green */
+            text-decoration: line-through;
+        }
+        .task-item.in-progress {
+            background-color: #FEF3C7; /* Light yellow */
+            color: #92400E; /* Dark yellow */
+        }
+        .task-item.postponed {
+            background-color: #FEE2E2; /* Light red */
+            color: #991B1B; /* Dark red */
+        }
+        .task-item.manual {
+            background-color: #E0E7FF; /* Lighter blue for manual */
+            color: #3730A3; /* Indigo for manual */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center py-8">
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg flex flex-col lg:flex-row gap-8">
+        <div class="lg:w-1/2 p-6 card">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Home Project Planner</h2>
+
+            <div class="mb-6">
+                <label for="projectDescription" class="block text-gray-700 text-sm font-medium mb-2">Describe your home improvement project or issue:</label>
+                <textarea id="projectDescription" rows="6" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out" placeholder="e.g., Repair a drywall hole, fix a leaky faucet, paint a bedroom..."></textarea>
+            </div>
+
+            <button id="generatePlanBtn" class="btn-primary w-full flex items-center justify-center">
+                <span id="generatePlanText">Generate Plan</span>
+                <div id="loadingSpinner" class="loading-spinner hidden" style="margin-left: 8px; margin-right: 0;"></div>
+            </button>
+
+            <div id="aiOutput" class="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">AI-Generated Plan:</h3>
+                <div class="mb-4">
+                    <p class="text-gray-700 font-medium">Complexity: <span id="outputComplexity" class="font-normal text-indigo-600"></span></p>
+                    <p class="text-gray-700 font-medium">Severity: <span id="outputSeverity" class="font-normal text-indigo-600"></span></p>
+                    <p class="text-gray-700 font-medium">Estimated Deadline: <span id="outputDeadline" class="font-normal text-indigo-600"></span></p>
+                </div>
+                <div class="mb-4">
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">Materials & Tools Needed:</h4>
+                    <ul id="outputMaterials" class="list-disc list-inside text-gray-600"></ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-medium text-gray-700 mb-2">Tutorials & Resources:</h4>
+                    <ul id="outputTutorials" class="list-disc list-inside text-gray-600"></ul>
+                </div>
+                <button id="addAITaskToCalendarBtn" class="btn-primary mt-6 w-full">Add to Calendar</button>
+            </div>
+
+            <div id="messageBox" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="closeMessageBox">&times;</span>
+                    <p id="messageText" class="text-gray-800 text-lg"></p>
+                    <button id="messageBoxOkBtn" class="btn-primary mt-4 float-right">OK</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:w-1/2 p-6 card flex flex-col">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Project Calendar</h2>
+
+            <div class="flex justify-between items-center mb-4">
+                <button id="prevMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="currentMonthYear" class="text-xl font-semibold text-gray-800"></h3>
+                <button id="nextMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="grid grid-cols-7 gap-4 text-center font-medium text-gray-600 mb-2">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div id="calendarGrid" class="calendar-grid flex-grow">
+                </div>
+
+            <button id="addTaskManuallyBtn" class="btn-secondary mt-6 w-full">Manually Add Task</button>
+
+            <div id="taskModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="closeTaskModal">&times;</span>
+                    <h3 id="taskModalTitle" class="text-2xl font-bold text-gray-800 mb-4">Add New Task</h3>
+
+                    <div id="taskView" class="hidden">
+                        <p class="mb-2"><span class="font-semibold">Description:</span> <span id="viewDescription"></span></p>
+                        <p class="mb-2"><span class="font-semibold">Type:</span> <span id="viewType"></span></p>
+                        <p class="mb-2"><span class="font-semibold">Status:</span> <span id="viewStatus"></span></p>
+                        <p class="mb-2"><span class="font-semibold">Date:</span> <span id="viewDate"></span></p>
+                        <p class="mb-2"><span class="font-semibold">Complexity:</span> <span id="viewComplexity"></span></p>
+                        <p class="mb-2"><span class="font-semibold">Severity:</span> <span id="viewSeverity"></span></p>
+                        <div class="mb-2"><p class="font-semibold">Materials:</p> <ul id="viewMaterials" class="list-disc list-inside ml-4"></ul></div>
+                        <div class="mb-2"><p class="font-semibold">Tutorials:</p> <ul id="viewTutorials" class="list-disc list-inside ml-4"></ul></div>
+
+                        <div class="flex justify-end gap-2 mt-4">
+                            <button id="editTaskBtn" class="btn-secondary">Edit</button>
+                            <button id="deleteTaskBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Delete</button>
+                        </div>
+                         <div class="flex justify-start gap-2 mt-4 border-t pt-4">
+                            <button id="markCompleteBtn" class="btn-primary">Mark Complete</button>
+                            <button id="markInProgressBtn" class="btn-secondary">Mark In Progress</button>
+                            <button id="markPostponedBtn" class="btn-outline">Mark Postponed</button>
+                        </div>
+                    </div>
+
+                    <div id="taskEdit" class="hidden">
+                        <div class="mb-4">
+                            <label for="taskDescriptionInput" class="block text-gray-700 text-sm font-medium mb-2">Task Description:</label>
+                            <input type="text" id="taskDescriptionInput" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="taskDateInput" class="block text-gray-700 text-sm font-medium mb-2">Date:</label>
+                            <input type="date" id="taskDateInput" class="w-full p-2 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="taskStatusInput" class="block text-gray-700 text-sm font-medium mb-2">Status:</label>
+                            <select id="taskStatusInput" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <option value="pending">Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="complete">Complete</option>
+                                <option value="postponed">Postponed</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end gap-2 mt-4">
+                            <button id="saveTaskBtn" class="btn-primary">Save Task</button>
+                            <button id="cancelTaskBtn" class="btn-outline">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- SECURITY WARNING ---
+    // The configuration object below contains sensitive identifiers.
+    // While Firebase requires this on the client-side, it is ONLY secure if you have
+    // set up Firestore Security Rules in your Firebase project console.
+    // Without proper security rules, anyone can read/write to your database.
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+    apiKey: "AIzaSyBmtejvlfgak7_Ri_3Pl4VJmh-psAElae0",
+    authDomain: "home-improvement-77903.firebaseapp.com",
+    projectId: "home-improvement-77903",
+    storageBucket: "home-improvement-77903.firebasestorage.app",
+    messagingSenderId: "1002228751462",
+    appId: "1:1002228751462:web:88aefba46cbb28c503e1a7",
+    measurementId: "G-R0NSVTVN6N"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    let userId = null;
+    let isAuthReady = false;
+
+    // --- SECURITY WARNING ---
+    // The key below provides access to the Gemini API.
+    // NEVER expose this key in client-side code in a production environment.
+    // Anyone can steal it and use it, leading to charges on your account.
+    // The correct method is to make the API call from a secure backend (e.g., a Firebase Cloud Function)
+    // and have your frontend call that function.
+    // I have replaced your key with a placeholder.
+    const GEMINI_API_KEY = "AIzaSyCnwYfziUTss8qYY8fqudz8XG7TKOXrx_M"; // <-- REPLACE with your new, valid Gemini API key
+
+    // DOM Elements
+    const projectDescriptionInput = document.getElementById('projectDescription');
+    const generatePlanBtn = document.getElementById('generatePlanBtn');
+    const generatePlanText = document.getElementById('generatePlanText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const aiOutputDiv = document.getElementById('aiOutput');
+    const outputComplexity = document.getElementById('outputComplexity');
+    const outputSeverity = document.getElementById('outputSeverity');
+    const outputDeadline = document.getElementById('outputDeadline');
+    const outputMaterials = document.getElementById('outputMaterials');
+    const outputTutorials = document.getElementById('outputTutorials');
+    const addAITaskToCalendarBtn = document.getElementById('addAITaskToCalendarBtn');
+    const prevMonthBtn = document.getElementById('prevMonthBtn');
+    const nextMonthBtn = document.getElementById('nextMonthBtn');
+    const currentMonthYearHeader = document.getElementById('currentMonthYear');
+    const calendarGrid = document.getElementById('calendarGrid');
+    const addTaskManuallyBtn = document.getElementById('addTaskManuallyBtn');
+
+    // Message Box Elements
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+    const closeMessageBox = document.getElementById('closeMessageBox');
+    const messageBoxOkBtn = document.getElementById('messageBoxOkBtn');
+
+    // Task Modal Elements
+    const taskModal = document.getElementById('taskModal');
+    const closeTaskModal = document.getElementById('closeTaskModal');
+    const taskModalTitle = document.getElementById('taskModalTitle');
+    const taskView = document.getElementById('taskView');
+    const taskEdit = document.getElementById('taskEdit');
+    const viewDescription = document.getElementById('viewDescription');
+    const viewType = document.getElementById('viewType');
+    const viewStatus = document.getElementById('viewStatus');
+    const viewDate = document.getElementById('viewDate');
+    const viewComplexity = document.getElementById('viewComplexity');
+    const viewSeverity = document.getElementById('viewSeverity');
+    const viewMaterials = document.getElementById('viewMaterials');
+    const viewTutorials = document.getElementById('viewTutorials');
+    const taskDescriptionInput = document.getElementById('taskDescriptionInput');
+    const taskDateInput = document.getElementById('taskDateInput');
+    const taskStatusInput = document.getElementById('taskStatusInput');
+    const saveTaskBtn = document.getElementById('saveTaskBtn');
+    const cancelTaskBtn = document.getElementById('cancelTaskBtn');
+    const editTaskBtn = document.getElementById('editTaskBtn');
+    const markCompleteBtn = document.getElementById('markCompleteBtn');
+    const markInProgressBtn = document.getElementById('markInProgressBtn');
+    const markPostponedBtn = document.getElementById('markPostponedBtn');
+    const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+
+    // App State
+    let currentEditingTask = null;
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let tasks = [];
+
+    function showMessage(message) {
+        messageText.textContent = message;
+        messageBox.style.display = 'flex';
+    }
+
+    closeMessageBox.onclick = () => messageBox.style.display = 'none';
+    messageBoxOkBtn.onclick = () => messageBox.style.display = 'none';
+    closeTaskModal.onclick = () => taskModal.style.display = 'none';
+    cancelTaskBtn.onclick = () => openTaskModal(currentEditingTask); // Go back to view mode on cancel
+    window.onclick = (event) => {
+        if (event.target == messageBox) messageBox.style.display = 'none';
+        if (event.target == taskModal) taskModal.style.display = 'none';
+    };
+
+    // Firebase Authentication
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            userId = user.uid;
+            console.log("Authenticated with Firebase UID:", userId);
+            isAuthReady = true;
+            setupTaskListener();
+        } else {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Firebase anonymous sign-in error:", error);
+                showMessage("Could not connect to the database. Your session will not be saved.");
+            }
+        }
+    });
+
+    function setupTaskListener() {
+        if (db && userId) {
+            const tasksColRef = collection(db, 'users', userId, 'tasks');
+            onSnapshot(tasksColRef, (snapshot) => {
+                tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCalendar();
+            }, (error) => {
+                console.error("Error fetching tasks:", error);
+                showMessage("Failed to load tasks. Please check your internet connection.");
+            });
+        } else {
+            renderCalendar(); // Render empty calendar if no DB connection
+        }
+    }
+
+    async function saveTask(taskData) {
+        if (!isAuthReady || !db || !userId) {
+            showMessage("Database not ready. Task cannot be saved.");
+            return;
+        }
+
+        try {
+            const taskRefPath = collection(db, 'users', userId, 'tasks');
+            if (taskData.id) {
+                const taskRef = doc(taskRefPath, taskData.id);
+                const id = taskData.id;
+                delete taskData.id; // Do not save the ID inside the document itself
+                await updateDoc(taskRef, taskData);
+                taskData.id = id; // Add it back for local state
+            } else {
+                await addDoc(taskRefPath, taskData);
+            }
+            taskModal.style.display = 'none';
+        } catch (e) {
+            console.error("Error saving task: ", e);
+            showMessage("Failed to save task. Please try again.");
+        }
+    }
+
+    async function deleteTask(taskId) {
+        if (!isAuthReady || !db || !userId) {
+            showMessage("Database not ready. Task cannot be deleted.");
+            return;
+        }
+        try {
+            await deleteDoc(doc(db, 'users', userId, 'tasks', taskId));
+            showMessage("Task deleted successfully!");
+            taskModal.style.display = 'none';
+        } catch (e) {
+            console.error("Error deleting task: ", e);
+            showMessage("Failed to delete task. Please try again.");
+        }
+    }
+
+    generatePlanBtn.addEventListener('click', async () => {
+        const description = projectDescriptionInput.value.trim();
+        if (!description) {
+            showMessage("Please enter a description for your project.");
+            return;
+        }
+
+        generatePlanText.textContent = 'Generating...';
+        loadingSpinner.classList.remove('hidden');
+        generatePlanBtn.disabled = true;
+        aiOutputDiv.classList.add('hidden');
+
+        // ***FIXED***: Corrected model name from 'gemini-2.0-flash' to 'gemini-1.5-flash'
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        
+        const payload = {
+            contents: [{
+                parts: [{
+                    text: `Analyze the following home improvement project: "${description}". Respond ONLY with a valid JSON object based on this schema: {"type": "OBJECT", "properties": {"complexity": {"type": "STRING"}, "severity": {"type": "STRING"}, "estimatedDeadlineDays": {"type": "NUMBER"}, "materials": {"type": "ARRAY", "items": {"type": "STRING"}}, "tutorials": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"title": {"type": "STRING"}, "url": {"type": "STRING"}}}}}}`
+                }]
+            }],
+            generationConfig: { responseMimeType: "application/json" }
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json();
+                console.error("API Error Response:", errorBody);
+                throw new Error(`API request failed with status ${response.status}.`);
+            }
+            
+            const result = await response.json();
+
+            if (result.candidates && result.candidates[0].content.parts[0].text) {
+                const aiData = JSON.parse(result.candidates[0].content.parts[0].text);
+                
+                outputComplexity.textContent = aiData.complexity || 'Not specified';
+                outputSeverity.textContent = aiData.severity || 'Not specified';
+                outputDeadline.textContent = `${aiData.estimatedDeadlineDays || 'N/A'} days`;
+
+                outputMaterials.innerHTML = '';
+                aiData.materials.forEach(material => {
+                    const li = document.createElement('li');
+                    li.textContent = material;
+                    outputMaterials.appendChild(li);
+                });
+
+                outputTutorials.innerHTML = '';
+                aiData.tutorials.forEach(tutorial => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = tutorial.url || `https://www.youtube.com/results?search_query=${encodeURIComponent(tutorial.title)}`;
+                    a.textContent = tutorial.title;
+                    a.target = "_blank";
+                    a.className = "text-blue-600 hover:underline";
+                    li.appendChild(a);
+                    outputTutorials.appendChild(li);
+                });
+
+                aiOutputDiv.classList.remove('hidden');
+                addAITaskToCalendarBtn.aiData = { ...aiData, description };
+            } else {
+                throw new Error("AI response format is unexpected.");
+            }
+
+        } catch (error) {
+            console.error("Error calling Gemini API:", error);
+            showMessage("Failed to generate plan. Please check your internet connection, API key, and model name, then try again.");
+        } finally {
+            generatePlanText.textContent = 'Generate Plan';
+            loadingSpinner.classList.add('hidden');
+            generatePlanBtn.disabled = false;
+        }
+    });
+
+    addAITaskToCalendarBtn.addEventListener('click', () => {
+        const aiData = addAITaskToCalendarBtn.aiData;
+        if (!aiData) return;
+        const deadlineDate = new Date();
+        deadlineDate.setDate(deadlineDate.getDate() + (aiData.estimatedDeadlineDays || 7)); // Default to 7 days
+        const newTask = {
+            description: aiData.description,
+            type: 'AI-Generated',
+            status: 'pending',
+            date: deadlineDate.toISOString().split('T')[0],
+            complexity: aiData.complexity || 'N/A',
+            severity: aiData.severity || 'N/A',
+            materials: aiData.materials || [],
+            tutorials: aiData.tutorials || [],
+            createdAt: new Date().toISOString()
+        };
+        saveTask(newTask);
+        aiOutputDiv.classList.add('hidden');
+        projectDescriptionInput.value = '';
+    });
+
+    function renderCalendar() {
+        calendarGrid.innerHTML = '';
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const startDayOfWeek = firstDayOfMonth.getDay();
+        currentMonthYearHeader.textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+        for (let i = 0; i < startDayOfWeek; i++) {
+            calendarGrid.appendChild(document.createElement('div'));
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day current-month';
+            const dayNumberSpan = document.createElement('span');
+            dayNumberSpan.className = 'calendar-day-number';
+            dayNumberSpan.textContent = day;
+            dayDiv.appendChild(dayNumberSpan);
+
+            // Using UTC date to prevent timezone-related "off-by-one" errors
+            const tasksForDay = tasks.filter(task => {
+                const taskDate = new Date(task.date + 'T00:00:00');
+                return taskDate.getFullYear() === currentYear && taskDate.getMonth() === currentMonth && taskDate.getDate() === day;
+            });
+
+            tasksForDay.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.status} ${task.type === 'Manual' ? 'manual' : ''}`;
+                taskItem.textContent = task.description;
+                taskItem.dataset.taskId = task.id;
+                taskItem.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent modal from closing if day div click handler is added
+                    openTaskModal(task);
+                });
+                dayDiv.appendChild(taskItem);
+            });
+            calendarGrid.appendChild(dayDiv);
+        }
+    }
+
+    prevMonthBtn.addEventListener('click', () => {
+        currentMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        if (currentMonth === 11) currentYear--;
+        renderCalendar();
+    });
+
+    nextMonthBtn.addEventListener('click', () => {
+        currentMonth = currentMonth === 11 ? 0 : currentMonth + 1;
+        if (currentMonth === 0) currentYear++;
+        renderCalendar();
+    });
+
+    addTaskManuallyBtn.addEventListener('click', () => {
+        currentEditingTask = null;
+        openTaskModal(null, 'edit');
+    });
+
+    editTaskBtn.addEventListener('click', () => {
+        openTaskModal(currentEditingTask, 'edit');
+    });
+
+    function openTaskModal(task, mode = 'view') {
+        currentEditingTask = task;
+        if (mode === 'edit') {
+            taskModalTitle.textContent = task ? 'Edit Task' : 'Add New Task';
+            taskDescriptionInput.value = task?.description || '';
+            taskDateInput.value = task?.date || new Date().toISOString().split('T')[0];
+            taskStatusInput.value = task?.status || 'pending';
+            taskView.classList.add('hidden');
+            taskEdit.classList.remove('hidden');
+        } else {
+            taskModalTitle.textContent = task.description;
+            viewDescription.textContent = task.description;
+            viewType.textContent = task.type || 'Manual';
+            viewStatus.textContent = task.status;
+            viewDate.textContent = new Date(task.date + 'T00:00:00').toLocaleDateString();
+            viewComplexity.textContent = task.complexity || 'N/A';
+            viewSeverity.textContent = task.severity || 'N/A';
+
+            const populateList = (element, items, defaultText) => {
+                element.innerHTML = '';
+                const itemsToShow = items && items.length > 0 ? items : [{ title: defaultText, url: null }];
+                itemsToShow.forEach(item => {
+                    const li = document.createElement('li');
+                    if(item.url) {
+                        const a = document.createElement('a');
+                        a.href = item.url;
+                        a.textContent = item.title;
+                        a.target = "_blank";
+                        a.className = "text-blue-600 hover:underline";
+                        li.appendChild(a);
+                    } else {
+                        li.textContent = typeof item === 'string' ? item : item.title;
+                    }
+                    element.appendChild(li);
+                });
+            };
+            populateList(viewMaterials, task.materials, 'No materials listed.');
+            populateList(viewTutorials, task.tutorials, 'No tutorials listed.');
+
+            markCompleteBtn.style.display = task.status === 'complete' ? 'none' : 'inline-block';
+            markInProgressBtn.style.display = task.status === 'in-progress' ? 'none' : 'inline-block';
+            markPostponedBtn.style.display = task.status === 'postponed' ? 'none' : 'inline-block';
+
+            taskEdit.classList.add('hidden');
+            taskView.classList.remove('hidden');
+        }
+        taskModal.style.display = 'flex';
+    }
+
+    saveTaskBtn.addEventListener('click', () => {
+        if (!taskDescriptionInput.value || !taskDateInput.value) {
+            showMessage("Please fill in the description and date.");
+            return;
+        }
+        const taskData = {
+            ...(currentEditingTask || {}),
+            description: taskDescriptionInput.value.trim(),
+            date: taskDateInput.value,
+            status: taskStatusInput.value,
+            type: currentEditingTask?.type || 'Manual',
+            materials: currentEditingTask?.materials || [],
+            tutorials: currentEditingTask?.tutorials || [],
+            complexity: currentEditingTask?.complexity || 'N/A',
+            severity: currentEditingTask?.severity || 'N/A',
+            createdAt: currentEditingTask?.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        saveTask(taskData);
+    });
+
+    const updateStatus = (status) => {
+        if (currentEditingTask) {
+            saveTask({ ...currentEditingTask, status, updatedAt: new Date().toISOString() });
+        }
+    };
+    markCompleteBtn.onclick = () => updateStatus('complete');
+    markInProgressBtn.onclick = () => updateStatus('in-progress');
+    markPostponedBtn.onclick = () => updateStatus('postponed');
+
+    deleteTaskBtn.addEventListener('click', () => {
+        if (currentEditingTask && confirm("Are you sure you want to delete this task?")) {
+            deleteTask(currentEditingTask.id);
+        }
+    });
+
+</script>
+</body>
+</html>
