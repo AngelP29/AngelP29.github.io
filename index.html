@@ -14,6 +14,10 @@
         }
         .container {
             max-width: 1200px;
+            /* Adjustments for centering and column layout */
+            display: flex;
+            flex-direction: column; /* Stack children vertically */
+            align-items: center; /* Center horizontally */
         }
         .card {
             background-color: #ffffff;
@@ -142,28 +146,42 @@
             white-space: nowrap;
             font-size: 0.75rem;
         }
+        /* Custom styles for legend colors based on original task-item classes */
         .task-item.complete {
-            background-color: #D1FAE5; /* Light green */
-            color: #065F46; /* Dark green */
-            text-decoration: line-through;
+            background-color: #BFDBFE; /* Blue - changed from light green to blue for legend */
+            color: #1E40AF; /* Dark blue */
         }
         .task-item.in-progress {
             background-color: #FEF3C7; /* Light yellow */
             color: #92400E; /* Dark yellow */
         }
         .task-item.postponed {
-            background-color: #FEE2E2; /* Light red */
-            color: #991B1B; /* Dark red */
+            background-color: #F0ABFC; /* Light purple - changed from light red to purple for legend */
+            color: #581C87; /* Dark purple */
         }
         .task-item.manual {
             background-color: #E0E7FF; /* Lighter blue for manual */
             color: #3730A3; /* Indigo for manual */
         }
+
+        /* Legend specific styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        .legend-color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 1px solid #E5E7EB; /* Subtle border for clarity */
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center py-8">
-    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg flex flex-col lg:flex-row gap-8">
-        <div class="lg:w-1/2 p-6 card">
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg flex-col lg:flex-row gap-8">
+        <div class="w-full lg:w-1/2 p-6 card mb-8 lg:mb-0">
             <h2 class="text-3xl font-bold text-gray-800 mb-6">Home Project Planner</h2>
 
             <div class="mb-6">
@@ -201,24 +219,37 @@
                     <button id="messageBoxOkBtn" class="btn-primary mt-4 float-right">OK</button>
                 </div>
             </div>
-
         </div>
 
-        <div class="lg:w-1/2 p-6 card flex flex-col">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Project Calendar</h2>
+        <div class="w-full lg:w-1/2 p-6 card flex flex-col items-center"> <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Project Calendar</h2>
 
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center mb-4 w-full">
                 <button id="prevMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
                 <h3 id="currentMonthYear" class="text-xl font-semibold text-gray-800"></h3>
                 <button id="nextMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
             </div>
 
-            <div class="grid grid-cols-7 gap-4 text-center font-medium text-gray-600 mb-2">
+            <div class="grid grid-cols-7 gap-4 text-center font-medium text-gray-600 mb-2 w-full">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
 
-            <div id="calendarGrid" class="calendar-grid flex-grow">
+            <div id="calendarGrid" class="calendar-grid flex-grow w-full">
+            </div>
+
+            <div class="flex justify-center gap-6 mt-6 w-full">
+                <div class="legend-item">
+                    <div class="legend-color-box bg-yellow-200"></div>
+                    <span class="text-gray-700 text-sm">In Progress</span>
                 </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-blue-200"></div>
+                    <span class="text-gray-700 text-sm">Completed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-purple-300"></div>
+                    <span class="text-gray-700 text-sm">Postponed</span>
+                </div>
+            </div>
 
             <button id="addTaskManuallyBtn" class="btn-secondary mt-6 w-full">Manually Add Task</button>
 
@@ -241,11 +272,11 @@
                             <button id="editTaskBtn" class="btn-secondary">Edit</button>
                             <button id="deleteTaskBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Delete</button>
                         </div>
-                         <div class="flex justify-start gap-2 mt-4 border-t pt-4">
-                            <button id="markCompleteBtn" class="btn-primary">Mark Complete</button>
-                            <button id="markInProgressBtn" class="btn-secondary">Mark In Progress</button>
-                            <button id="markPostponedBtn" class="btn-outline">Mark Postponed</button>
-                        </div>
+                           <div class="flex justify-start gap-2 mt-4 border-t pt-4">
+                                <button id="markCompleteBtn" class="btn-primary">Mark Complete</button>
+                                <button id="markInProgressBtn" class="btn-secondary">Mark In Progress</button>
+                                <button id="markPostponedBtn" class="btn-outline">Mark Postponed</button>
+                            </div>
                     </div>
 
                     <div id="taskEdit" class="hidden">
@@ -275,7 +306,8 @@
             </div>
         </div>
     </div>
-
+</body>
+</html>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
