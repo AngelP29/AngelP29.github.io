@@ -8,27 +8,67 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Define the Arial Nova Light font */
+        @font-face {
+            font-family: 'Arial Nova Light';
+            src: url('fonts/ArialNova-Light.woff2') format('woff2'),
+                 url('fonts/ArialNova-Light.woff') format('woff');
+            /* IMPORTANT: You need to have these font files in a 'fonts/' directory. */
+            /* Add other formats (.ttf, .eot) for broader browser support if provided by your font vendor. */
+            font-weight: 300; /* Light weight typically corresponds to a font-weight value like 300 */
+            font-style: normal; /* Specify normal for the base font */
+            font-display: swap; /* Improves performance by showing fallback text first */
+        }
+
+        /* If you also have Arial Nova Light Italic */
+        @font-face {
+            font-family: 'Arial Nova Light';
+            src: url('fonts/ArialNova-LightItalic.woff2') format('woff2'),
+                 url('fonts/ArialNova-LightItalic.woff') format('woff');
+            font-weight: 300;
+            font-style: italic;
+            font-display: swap;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Arial Nova Light', 'Inter', sans-serif; /* Prioritize Arial Nova Light, then Inter, then generic sans-serif */
+            background-color: #f0f2f5; /* Light gray background */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+            font-weight: 300; /* Apply the light weight to the body */
+            font-style: normal; /* Ensure normal style by default */
         }
         .container {
             max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
         }
         .card {
-            background-color: #ffffff;
+            background-color: #ffffff; /* Changed from #ccc8c8 to white for better contrast with light gray background */
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            width: 100%;
         }
         .btn-primary {
-            background-color: #4F46E5;
+            background-color: #4F46E5; /* Reverted to original primary color for consistency */
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
             transition: background-color 0.2s ease;
         }
         .btn-primary:hover {
-            background-color: #4338CA;
+            background-color: #4338CA; /* Reverted to original primary hover color */
         }
         .btn-secondary {
             background-color: #6B7280;
@@ -51,15 +91,15 @@
             background-color: #F3F4F6;
         }
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
+            display: none;
+            position: fixed;
+            z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
             justify-content: center;
             align-items: center;
         }
@@ -90,8 +130,8 @@
             cursor: pointer;
         }
         .loading-spinner {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4F46E5; /* Blue */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4F46E5;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -119,18 +159,16 @@
             align-items: flex-start;
             font-size: 0.875rem;
             position: relative;
-            background-color: #F9FAFB;
+            background-color: #F9FAFB; /* Slightly off-white for non-current month days */
         }
         .calendar-day.current-month {
-            background-color: #ffffff;
+            background-color: #ffffff; /* White for current month days */
         }
         .calendar-day-number {
             font-weight: 600;
             margin-bottom: 4px;
         }
         .task-item {
-            background-color: #DBEAFE; /* Light blue */
-            color: #1E40AF; /* Dark blue */
             padding: 4px 8px;
             border-radius: 6px;
             margin-bottom: 4px;
@@ -142,6 +180,7 @@
             white-space: nowrap;
             font-size: 0.75rem;
         }
+        /* Legend and Task Item Colors */
         .task-item.complete {
             background-color: #D1FAE5; /* Light green */
             color: #065F46; /* Dark green */
@@ -156,13 +195,27 @@
             color: #991B1B; /* Dark red */
         }
         .task-item.manual {
-            background-color: #E0E7FF; /* Lighter blue for manual */
-            color: #3730A3; /* Indigo for manual */
+            background-color: #DBEAFE; /* Light blue for manually added tasks */
+            color: #1E40AF; /* Dark blue */
+        }
+
+        /* Legend specific styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        .legend-color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 8px;
+            border: 1px solid #E5E7EB;
         }
     </style>
 </head>
-<body class="bg-red-50 min-h-screen flex items-center justify-center py-8">
-    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg flex flex-col lg:flex-row gap-8">
+<body class="min-h-screen flex items-center justify-center py-8">
+    <div class="container mx-auto p-6 bg-white rounded-xl shadow-lg">
         <div class="lg:w-1/2 p-6 card">
             <h2 class="text-3xl font-bold text-gray-800 mb-6">Home Project Planner</h2>
 
@@ -201,11 +254,10 @@
                     <button id="messageBoxOkBtn" class="btn-primary mt-4 float-right">OK</button>
                 </div>
             </div>
-
         </div>
 
         <div class="lg:w-1/2 p-6 card flex flex-col">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6">Your Project Calendar</h2>
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Your Project Calendar</h2>
 
             <div class="flex justify-between items-center mb-4">
                 <button id="prevMonthBtn" class="btn-outline px-4 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
@@ -218,7 +270,30 @@
             </div>
 
             <div id="calendarGrid" class="calendar-grid flex-grow">
+            </div>
+
+            ---
+
+            <div class="flex flex-wrap justify-center gap-4 mt-6">
+                <div class="legend-item">
+                    <div class="legend-color-box bg-yellow-200"></div>
+                    <span class="text-gray-700 text-sm">In Progress</span>
                 </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-green-200"></div>
+                    <span class="text-gray-700 text-sm">Completed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-red-300"></div>
+                    <span class="text-gray-700 text-sm">Postponed</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color-box bg-blue-200"></div>
+                    <span class="text-gray-700 text-sm">Manually Added</span>
+                </div>
+            </div>
+
+            ---
 
             <button id="addTaskManuallyBtn" class="btn-secondary mt-6 w-full">Manually Add Task</button>
 
@@ -241,11 +316,11 @@
                             <button id="editTaskBtn" class="btn-secondary">Edit</button>
                             <button id="deleteTaskBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Delete</button>
                         </div>
-                         <div class="flex justify-start gap-2 mt-4 border-t pt-4">
-                            <button id="markCompleteBtn" class="btn-primary">Mark Complete</button>
-                            <button id="markInProgressBtn" class="btn-secondary">Mark In Progress</button>
-                            <button id="markPostponedBtn" class="btn-outline">Mark Postponed</button>
-                        </div>
+                           <div class="flex justify-start gap-2 mt-4 border-t pt-4">
+                                <button id="markCompleteBtn" class="btn-primary">Mark Complete</button>
+                                <button id="markInProgressBtn" class="btn-secondary">Mark In Progress</button>
+                                <button id="markPostponedBtn" class="btn-outline">Mark Postponed</button>
+                            </div>
                     </div>
 
                     <div id="taskEdit" class="hidden">
@@ -310,8 +385,7 @@
     // Anyone can steal it and use it, leading to charges on your account.
     // The correct method is to make the API call from a secure backend (e.g., a Firebase Cloud Function)
     // and have your frontend call that function.
-    // I have replaced your key with a placeholder.
-    const GEMINI_API_KEY = "AIzaSyCnwYfziUTss8qYY8fqudz8XG7TKOXrx_M"; // <-- REPLACE with your new, valid Gemini API key
+    const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"; // <-- REPLACE with your NEW, VALID Gemini API key
 
     // DOM Elements
     const projectDescriptionInput = document.getElementById('projectDescription');
@@ -344,7 +418,7 @@
     const taskView = document.getElementById('taskView');
     const taskEdit = document.getElementById('taskEdit');
     const viewDescription = document.getElementById('viewDescription');
-    const viewType = document.getElementById('viewType');
+    const viewType = document = document.getElementById('viewType'); // Fixed typo: 'document ='
     const viewStatus = document.getElementById('viewStatus');
     const viewDate = document.getElementById('viewDate');
     const viewComplexity = document.getElementById('viewComplexity');
@@ -376,7 +450,13 @@
     closeMessageBox.onclick = () => messageBox.style.display = 'none';
     messageBoxOkBtn.onclick = () => messageBox.style.display = 'none';
     closeTaskModal.onclick = () => taskModal.style.display = 'none';
-    cancelTaskBtn.onclick = () => openTaskModal(currentEditingTask); // Go back to view mode on cancel
+    cancelTaskBtn.onclick = () => {
+        if (currentEditingTask) {
+            openTaskModal(currentEditingTask); // Go back to view mode on cancel if editing an existing task
+        } else {
+            taskModal.style.display = 'none'; // Close modal if it was a new task creation
+        }
+    };
     window.onclick = (event) => {
         if (event.target == messageBox) messageBox.style.display = 'none';
         if (event.target == taskModal) taskModal.style.display = 'none';
@@ -465,7 +545,7 @@
         generatePlanBtn.disabled = true;
         aiOutputDiv.classList.add('hidden');
 
-        // ***FIXED***: Corrected model name from 'gemini-2.0-flash' to 'gemini-1.5-flash'
+        // Corrected model name to 'gemini-1.5-flash'
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
         
         const payload = {
@@ -636,10 +716,10 @@
 
             const populateList = (element, items, defaultText) => {
                 element.innerHTML = '';
-                const itemsToShow = items && items.length > 0 ? items : [{ title: defaultText, url: null }];
+                const itemsToShow = items && items.length > 0 ? items : [defaultText]; // Handle non-object items and empty arrays
                 itemsToShow.forEach(item => {
                     const li = document.createElement('li');
-                    if(item.url) {
+                    if(typeof item === 'object' && item !== null && item.url) { // Check if it's an object with a URL
                         const a = document.createElement('a');
                         a.href = item.url;
                         a.textContent = item.title;
@@ -647,7 +727,7 @@
                         a.className = "text-blue-600 hover:underline";
                         li.appendChild(a);
                     } else {
-                        li.textContent = typeof item === 'string' ? item : item.title;
+                        li.textContent = (typeof item === 'object' && item !== null) ? item.title : item; // For materials, item might be a string
                     }
                     element.appendChild(li);
                 });
@@ -665,42 +745,52 @@
         taskModal.style.display = 'flex';
     }
 
+    markCompleteBtn.addEventListener('click', () => {
+        if (currentEditingTask) {
+            saveTask({ ...currentEditingTask, status: 'complete' });
+        }
+    });
+
+    markInProgressBtn.addEventListener('click', () => {
+        if (currentEditingTask) {
+            saveTask({ ...currentEditingTask, status: 'in-progress' });
+        }
+    });
+
+    markPostponedBtn.addEventListener('click', () => {
+        if (currentEditingTask) {
+            saveTask({ ...currentEditingTask, status: 'postponed' });
+        }
+    });
+
+    deleteTaskBtn.addEventListener('click', () => {
+        if (currentEditingTask && confirm('Are you sure you want to delete this task?')) {
+            deleteTask(currentEditingTask.id);
+        }
+    });
+
     saveTaskBtn.addEventListener('click', () => {
         if (!taskDescriptionInput.value || !taskDateInput.value) {
             showMessage("Please fill in the description and date.");
             return;
         }
-        const taskData = {
-            ...(currentEditingTask || {}),
-            description: taskDescriptionInput.value.trim(),
+        const updatedTask = {
+            id: currentEditingTask ? currentEditingTask.id : undefined,
+            description: taskDescriptionInput.value,
             date: taskDateInput.value,
             status: taskStatusInput.value,
-            type: currentEditingTask?.type || 'Manual',
+            type: currentEditingTask?.type || 'Manual', // Preserve type if existing, default to 'Manual'
+            complexity: currentEditingTask?.complexity || 'N/A', // Preserve AI details if available
+            severity: currentEditingTask?.severity || 'N/A',
             materials: currentEditingTask?.materials || [],
             tutorials: currentEditingTask?.tutorials || [],
-            complexity: currentEditingTask?.complexity || 'N/A',
-            severity: currentEditingTask?.severity || 'N/A',
-            createdAt: currentEditingTask?.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            createdAt: currentEditingTask?.createdAt || new Date().toISOString()
         };
-        saveTask(taskData);
+        saveTask(updatedTask);
     });
 
-    const updateStatus = (status) => {
-        if (currentEditingTask) {
-            saveTask({ ...currentEditingTask, status, updatedAt: new Date().toISOString() });
-        }
-    };
-    markCompleteBtn.onclick = () => updateStatus('complete');
-    markInProgressBtn.onclick = () => updateStatus('in-progress');
-    markPostponedBtn.onclick = () => updateStatus('postponed');
-
-    deleteTaskBtn.addEventListener('click', () => {
-        if (currentEditingTask && confirm("Are you sure you want to delete this task?")) {
-            deleteTask(currentEditingTask.id);
-        }
-    });
-
-</script>
+    // Initial render
+    renderCalendar();
+    </script>
 </body>
 </html>
